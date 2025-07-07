@@ -1,6 +1,5 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import { useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react'
@@ -29,6 +28,7 @@ const style =
 
 
 function App() {
+  {/* Arrays to keep track of all fruits and their data, the indexes correlate to a specific fruit*/}
   const [name] = useState(["Apple", "Banana", "Strawberry", "Blueberry"]);
   const [count, setCount] =  useState(0);
   const [checked, setChecked] = React.useState([true, true, true, true]);
@@ -43,9 +43,9 @@ function App() {
   const handleOpen = () => setOpen(true);
   const closeModal = () => setOpen(false);
 
-  const handleClick = () => 
+  const handleClick = (event) => 
   {
-    setAnchorEl(document.body);
+    setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => 
@@ -53,20 +53,24 @@ function App() {
     setAnchorEl(null);
   };
 
+  {/* Increases the quantity based on when the "+" has been clicked  */}
   const handleIncrement = index => () =>
   {
     const tempValue = quantityCount.slice();
 
-    if (quantityCount[index] <= 10)
+    {/* Makes sure that the specific fruit (which is tracked by index) is updated and clicks cannot exceed 10*/}
+    if (quantityCount[index] < 10)
     {
       tempValue[index] = quantityCount[index] + 1;
       setQuantityCount(tempValue);
     }
   }
 
+  {/* Handles decreasing the quantity based on when the "-" has been clicked */}
   const handleDecrement = index => () =>
   {
     const tempValue = quantityCount.slice();
+    {/* When quantity == 1 then the user must uncheck the icon */}
     if (quantityCount[index] > 1)
     {
       tempValue[index] = quantityCount[index] - 1;
@@ -74,17 +78,19 @@ function App() {
     }
   }
 
+  {/* Negates the boolean value as an indicator that the checkbox has been clicked */}
   const handleChange = index => event => 
   {
     const tempChecked = checked.slice();
     tempChecked[index] = !(event.target.checked);
     setChecked(tempChecked);
 
+     {/* Ensures that when the checkbox is checked so does the button value */}
     if (tempChecked[index] == false)
     {
       handleIncrement(index)();
     }
-    else
+    else {/*If bool = true, it means that the box has been unchecked so the quantity gets reset */}
     {
       quantityCount[index] = 0
     }
@@ -130,14 +136,19 @@ function App() {
         .then(data => 
         {
           temp += (data.nutritions.sugar * quantityCount[i]);
+          // setCount(prevCount => prevCount + (data.nutritions.sugar * quantityCount[i]));
         })
         .catch(error => console.log('error', error))
         .finally(() => 
           {
             setCount(temp);
           });
+        {/*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally */}
+        {/*This is so that I can use the latest updated value instead of a stale value */}
       }
     }
+    
+
   }
 
   return (
@@ -178,7 +189,7 @@ function App() {
           /> 
         </FormGroup>
         
-        {/* Thank god for stack overflow for this bc material ui wasn't working */}
+        {/* https://stackoverflow.com/questions/59305603/increment-and-decrement-button-via-material-ui-buttongroup */}
         <ButtonGroup size="large" aria-label="small outlined button group" sx={{ marginTop: 2}}>
           <Button variant="outlined" onClick={handleDecrement(0)}>-</Button>
           <Button display="true">{quantityCount[0]}</Button>
@@ -196,7 +207,11 @@ function App() {
           <Button display="true">{quantityCount[3]}</Button>
           <Button variant="outlined" onClick={handleIncrement(3)} sx={{marginRight:10}}>+</Button>
         </ButtonGroup>
-          
+        
+        {/*Area of struggle: Accessing a value while it is getting fetched async, not getting the updated value immediately 
+        Solution: Created a button to allow it to finish processing before I utilize the values in conditional statements
+        When I console.log, I noticed that values were getting updated PER fetch since it has to fetch for each fruit which means that 
+        it has to wait until its done before it can be used*/}
         <Button variant="outlined" sx= {{
           mt: 7,
           mr: 20,
@@ -224,6 +239,7 @@ function App() {
         }}
         
         endIcon={<ArrowForwardIcon/>} 
+
           onClick={event => {
             if (count > 70)
             {
@@ -264,23 +280,9 @@ function App() {
         </Modal>
 
       </Box>
-      
-      
-      {/* displays nutrition facts 12:26pm */}
-      {console.log("Total Sugar: " + count)};
-
-      {/* successfully grabbed data 1:47pm */}
-      {/* <Typography variant="h4" component="h1">
-        <li className="list-group-item" key={fruitName.calories}>{fruitName.calories}</li>
-      <li className="list-group-item" key={fruitName.sugar}>{fruitName.sugar}</li>
-      </Typography>  */}
-      
-
 
     </>
   );
 }
 
 export default App
-
-
