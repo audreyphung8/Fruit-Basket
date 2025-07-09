@@ -103,28 +103,6 @@ function App() {
     redirect: "follow"
   };
 
-  // useEffect(() =>
-  // {
-  //   let temp = 0;
-  //   for (let i = 0; i < checked.length; i++)
-  //   {
-  //     if (checked[i] == false)
-  //     {
-  //       fetch("/api/" + name[i], requestOptions)
-  //       .then(response => response.json())
-  //       .then(data => 
-  //       {
-  //         temp += (data.nutritions.sugar * quantityCount[i]);
-  //       })
-  //       .catch(error => console.log('error', error))
-  //       .finally(() => 
-  //         {
-  //           setCount(temp);
-  //       });
-  //     }
-  //   }
-  // },[trigger]);
-
   function fetchFruit()
   {
     let temp = 0;
