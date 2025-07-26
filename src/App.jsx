@@ -11,6 +11,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import Popover from '@mui/material/Popover';
 import Modal from '@mui/material/Modal';
 import SaveAltTwoToneIcon from '@mui/icons-material/SaveAltTwoTone';
+import { useEffect } from 'react';
 
 
 const style = 
@@ -27,32 +28,28 @@ const style =
 };
 
 
-function App() {
+function App() 
+{
   {/* Arrays to keep track of all fruits and their data, the indexes correlate to a specific fruit*/}
-  const [name] = useState(["Apple", "Banana", "Strawberry", "Blueberry"]);
+  const [name] = useState(["Apple", "Banana", "Strawberry", "Blueberry", "Grape", "Orange"]);
   const [count, setCount] =  useState(0);
-  const [checked, setChecked] = React.useState([true, true, true, true]);
+  const [checked, setChecked] = React.useState([true, true, true, true, true, true]);
   const [trigger, setTrigger] = useState(false);
-  const [quantityCount, setQuantityCount] = useState([0,0,0,0]);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
+  const [quantityCount, setQuantityCount] = useState([0,0,0,0,0,0]);
+  const [trackLimit, setTrackLimit] = useState(true);
+
+
+  // useEffect(() => 
+  // {
+  //   if (!trackLimit)
+  //   {
+  //     setTrackLimit(true);
+  //   }
+  // }, [trackLimit]);
+
   const [openModal, setOpen] = React.useState(false);
-
-
-
   const handleOpen = () => setOpen(true);
   const closeModal = () => setOpen(false);
-
-  const handlePopup = (event) => 
-  {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => 
-  {
-    setAnchorEl(null);
-  };
 
   {/* Increases the quantity based on when the "+" has been clicked  */}
   const handleIncrement = index => () =>
@@ -102,38 +99,75 @@ function App() {
     method: "GET",
     redirect: "follow"
   };
+  
 
-  function fetchFruit()
+  // function fetchFruit()
+  // {
+  //   let temp = 0;
+  //   for (let i = 0; i < checked.length; i++)
+  //   {
+  //     if (checked[i] == false)
+  //     {
+  //       fetch("/api/" + name[i], requestOptions)
+  //       .then(response => response.json())
+  //       .then(data => 
+  //       {
+  //         temp += (data.nutritions.sugar * quantityCount[i]);
+  //         // setCount(prevCount => prevCount + (data.nutritions.sugar * quantityCount[i]));
+  //       })
+  //       .catch(error => console.log('error', error))
+  //       .finally(() => 
+  //         {
+  //           setCount(temp);
+  //           console.log(temp);
+  //         });
+  //       {/*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally */}
+  //       {/*This is so that I can use the latest updated value instead of a stale value */}
+  //     }
+  //   }
+  // }
+
+  function fetchFruit() 
   {
     let temp = 0;
-    for (let i = 0; i < checked.length; i++)
+    const track_fetch_requests = [];
+
+    for (let i = 0; i < checked.length; i++) 
     {
-      if (checked[i] == false)
+      if (checked[i] === false) 
       {
-        fetch("/api/" + name[i], requestOptions)
-        .then(response => response.json())
-        .then(data => 
-        {
-          temp += (data.nutritions.sugar * quantityCount[i]);
-          // setCount(prevCount => prevCount + (data.nutritions.sugar * quantityCount[i]));
-        })
-        .catch(error => console.log('error', error))
-        .finally(() => 
-          {
-            setCount(temp);
-          });
-        {/*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally */}
-        {/*This is so that I can use the latest updated value instead of a stale value */}
+        const promise = fetch("/api/" + name[i], requestOptions)
+          .then(response => response.json())
+          .then(data => {
+            temp += data.nutritions.sugar * quantityCount[i];
+          })
+          .catch(error => console.log('error', error));
+        
+        track_fetch_requests.push(promise);
       }
     }
-    
 
+    Promise.all(track_fetch_requests).then(() => 
+    {
+      setCount(temp);
+
+      if (temp > 70)
+      {
+        setTrackLimit(false);
+      }
+      else
+      {
+        setTrackLimit(true);
+        handleOpen();
+      }
+    });
   }
+    
 
   return (
     <> 
       {!trigger &&
-        <Box display="flex" justifyContent="center" alignItems="center" sx={{ bgcolor: '#fce5dd', width: 'fit-content', borderRadius: 2, px: 4, mx: 'auto', mb: 3}}>     
+        <Box display="flex" justifyContent="center" alignItems="center" sx={{bgcolor: '#fce5dd', width: 'fit-content', borderRadius: 2, px: 4, mx: 'auto', mb: 3}}>     
           <Typography variant="h1" sx={{ textAlign: 'center', mr: 2, fontFamily: 'Gambetta',fontWeight: 'bold' }}>
             Fruit Basket!
           </Typography>
@@ -178,131 +212,149 @@ function App() {
         </Box>
       }
       {trigger &&
-          <Box display="flex" bgcolor='#fce5dd' justifyContent="center" alignItems="center" marginLeft={30} flexDirection="column" sx={{ borderRadius: 7, p: 4}}>
-          
-          <FormGroup row sx={{columnGap: 4}}>
-            <FormControlLabel control={<Checkbox onChange={handleChange(0)}/>}
-              label=
-              {
-                <img src="https://www.iconpacks.net/icons/2/free-apple-icon-3155-thumb.png" alt="apple icon" width="150"/>
-              }
-            />
+          <Box display="flex" bgcolor='#fce5dd' justifyContent="center" alignItems="center" flexDirection="column" marginLeft={40} sx={{ borderRadius: 7, p: 7}}>
+            <Box display="flex" flexDirection="row" justifyContent="center" gap={6} marginTop={-5}>
+              <Box display="flex" flexDirection="column" alignItems="center">
+                <FormControlLabel control={<Checkbox onChange={handleChange(0)}/>}
+                  label=
+                  {
+                    <img src="https://www.iconpacks.net/icons/2/free-apple-icon-3155-thumb.png" alt="apple icon" width="150"/>
+                  }
+                />
+                {!checked[0] &&
+                  <ButtonGroup size="small" aria-label="apple quantity">
+                    <Button variant="outlined" onClick={handleDecrement(0)}>-</Button>
+                    <Button display="true">{quantityCount[0]}</Button>
+                    <Button variant="outlined" onClick={handleIncrement(0)} sx={{marginRight:10}}>+</Button>
+                  </ButtonGroup>
+                } 
+              </Box>
+                
+              <Box display="flex" flexDirection="column" alignItems="center">
+                <FormControlLabel control={<Checkbox onChange={handleChange(1)}/>}
+                  label=
+                  {
+                    <img src="https://cdn-icons-png.flaticon.com/512/6482/6482627.png" alt="banana icon"  width="150"/>
+                  }
+                /> 
+                {!checked[1] &&
+                  <ButtonGroup size="small" aria-label="banana quantity">
+                    <Button variant="outlined" onClick={handleDecrement(1)}>-</Button>
+                    <Button display="true">{quantityCount[1]}</Button>
+                    <Button variant="outlined" onClick={handleIncrement(1)}sx={{marginRight:10}}>+</Button>
+                  </ButtonGroup>
+                }
+              </Box>
 
-            <FormControlLabel control={<Checkbox onChange={handleChange(1)}/>}
-              label=
-              {
-                <img src="https://cdn-icons-png.flaticon.com/512/6482/6482627.png" alt="banana icon"  width="150"/>
-              }
-            /> 
-
-            <FormControlLabel control={<Checkbox onChange={handleChange(2)}/>}
-              label=
-              {
-                <img src="https://cdn-icons-png.flaticon.com/512/5210/5210447.png" alt="strawberry icon"  width="150"/>
-              }
-            />
-
-            <FormControlLabel control={<Checkbox onChange={handleChange(3)}/>}
-              label=
-              {
-                <img src="https://cdn-icons-png.flaticon.com/512/5210/5210493.png" alt="blueberry icon"  width="150"/>
-              }
-            /> 
-          </FormGroup>
-          
-          {/* https://stackoverflow.com/questions/59305603/increment-and-decrement-button-via-material-ui-buttongroup */}
-          <ButtonGroup size="large" aria-label="small outlined button group" sx={{ marginTop: 2}}>
-            <Button variant="outlined" onClick={handleDecrement(0)}>-</Button>
-            <Button display="true">{quantityCount[0]}</Button>
-            <Button variant="outlined" onClick={handleIncrement(0)} sx={{marginRight:10}}>+</Button>
-
-            <Button variant="outlined" onClick={handleDecrement(1)}>-</Button>
-            <Button display="true">{quantityCount[1]}</Button>
-            <Button variant="outlined" onClick={handleIncrement(1)}sx={{marginRight:10}}>+</Button>
-
-            <Button variant="outlined" onClick={handleDecrement(2)}>-</Button>
-            <Button display="true">{quantityCount[2]}</Button>
-            <Button variant="outlined" onClick={handleIncrement(2)} sx={{marginRight:10}}>+</Button>
-
-            <Button variant="outlined" onClick={handleDecrement(3)}>-</Button>
-            <Button display="true">{quantityCount[3]}</Button>
-            <Button variant="outlined" onClick={handleIncrement(3)} sx={{marginRight:10}}>+</Button>
-          </ButtonGroup>
-          
-          {/*Area of struggle: Accessing a value while it is getting fetched async, not getting the updated value immediately 
-          Solution: Created a button to allow it to finish processing before I utilize the values in conditional statements
-          When I console.log, I noticed that values were getting updated PER fetch since it has to fetch for each fruit which means that 
-          it has to wait until its done before it can be used*/}
-          <Button variant="outlined" sx= {{
-            mt: 7,
-            mr: 20,
-            borderColor: 'black',
-            color: 'black',
-            '&:hover': {
-              backgroundColor: '#fa5081',
-            },
-          }}
-          endIcon={<SaveAltTwoToneIcon/>} 
-            onClick={event => {fetchFruit()}}>
-            Save
-          </Button>
-
-          <Button variant="contained" sx= {{
-            mt: -4.5,
-            ml: 14,
-            backgroundColor: '#fa5081',       
-            color: 'black',                
-            borderColor: 'black',          
-            border: '1px solid black',     
-            '&:hover': {
-              backgroundColor: 'white',
-            },
-          }}
-          
-          endIcon={<ArrowForwardIcon/>} 
-
-            onClick={event => {
-              if (count > 70)
-              {
-                handlePopup(event);
-                setCount(0);
-              }
-              else
-              {
-                handleOpen();
-              }
-            }}>
-            Confirm
-          </Button>
-
-          <Popover
-            id={id}
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: 'center',
-              horizontal: 'center',}}
-          >
-            <Typography sx={{p: 2}}>That's too much sugar!</Typography>
-          </Popover>
-
-          <Modal
-            open={openModal}
-            onClose={closeModal}>
-            <Box sx={style}>
-              <Typography id="modal-modal-title" variant="h6" component="h2">
-                Your fruit bowl has {count}g of sugar! 
-              </Typography>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                This is very healthy, but remember that too much sugar can be bad for you.
-              </Typography>
+              <Box display="flex" flexDirection="column" alignItems="center">
+                <FormControlLabel control={<Checkbox onChange={handleChange(2)}/>}
+                  label=
+                  {
+                    <img src="https://cdn-icons-png.flaticon.com/512/5210/5210447.png" alt="strawberry icon"  width="150"/>
+                  }
+                />
+                {!checked[2] &&
+                  <ButtonGroup size="small" aria-label="sb quantity">
+                    <Button variant="outlined" onClick={handleDecrement(2)}>-</Button>
+                    <Button display="true">{quantityCount[2]}</Button>
+                    <Button variant="outlined" onClick={handleIncrement(2)} sx={{marginRight:10}}>+</Button>
+                  </ButtonGroup>
+                }
+              </Box>
             </Box>
-          </Modal>
 
-        </Box>
+            <Box display="flex" flexDirection="row" justifyContent="center" gap={6} marginTop={3}>
+              <Box display="flex" flexDirection="column" alignItems="center">
+                <FormControlLabel control={<Checkbox onChange={handleChange(3)}/>}
+                  label=
+                  {
+                    <img src="https://cdn-icons-png.flaticon.com/512/5210/5210493.png" alt="blueberry icon"  width="150"/>
+                  }
+                /> 
+                {!checked[3] && 
+                  <ButtonGroup size="small" aria-label="bb quantity">
+                    <Button variant="outlined" onClick={handleDecrement(3)}>-</Button>
+                    <Button display="true">{quantityCount[3]}</Button>
+                    <Button variant="outlined" onClick={handleIncrement(3)} sx={{marginRight:10}}>+</Button>
+                  </ButtonGroup>
+                }
+              </Box>
+              
+              <Box display="flex" flexDirection="column" alignItems="center">
+                <FormControlLabel control={<Checkbox onChange={handleChange(4)}/>}
+                  label =
+                  {
+                    <img src="https://png.pngtree.com/png-vector/20220610/ourmid/pngtree-green-grapes-isolated-on-white-background-png-image_4827211.png" alt="green grape icon" width="150"/>
+                  }
+                />
+                {!checked[4] && 
+                  <ButtonGroup size="small" aria-label="grape quantity">
+                    <Button variant="outlined" onClick={handleDecrement(4)}>-</Button>
+                    <Button display="true">{quantityCount[4]}</Button>
+                    <Button variant="outlined" onClick={handleIncrement(4)} sx={{marginRight:10}}>+</Button>
+                  </ButtonGroup>
+                }
+              </Box>
+
+              <Box display="flex" flexDirection="column" alignItems="center">
+                <FormControlLabel control={<Checkbox onChange={handleChange(5)}/>}
+                  label =
+                  {
+                    <img src="https://png.pngtree.com/png-clipart/20220616/original/pngtree-orange-cartoon-png-image_8081563.png" alt="orange icon" width="150"/>
+                  }
+                />
+                {!checked[5] &&
+                  <ButtonGroup size="small" aria-label="orange quantity">
+                    <Button variant="outlined" onClick={handleDecrement(5)}>-</Button>
+                    <Button display="true">{quantityCount[5]}</Button>
+                    <Button variant="outlined" onClick={handleIncrement(5)} sx={{marginRight:10}}>+</Button>
+                  </ButtonGroup>
+                }
+              </Box>
+            </Box>
+
+            <Button variant="contained" sx= {{
+              mt: 9,
+              ml: 1,
+              backgroundColor: '#fa5081',       
+              color: 'black',                
+              borderColor: 'black',          
+              border: '1px solid black',     
+              '&:hover': {
+                backgroundColor: 'white',
+              },
+            }}
+
+            endIcon={<ArrowForwardIcon/>} 
+
+              onClick={event => {
+                fetchFruit();
+              }}>
+              Confirm
+            </Button>
+            
+            {!trackLimit &&
+              <Typography sx={{ mt: 2, color: '#c70039', fontWeight: 'bold' }}>
+                ⚠️ WARNING ⚠️ You added {count}g of sugar, pick again to stay within 70g!
+              </Typography>
+            }
+
+            <Modal
+              open={openModal}
+              onClose={closeModal}>
+              <Box sx={style}>
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                  Your fruit bowl has {count}g of sugar! 
+                </Typography>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  This is very healthy, but remember that too much sugar can be bad for you.
+                </Typography>
+              </Box>
+            </Modal>
+          </Box>
       }
     </>
   );
 }
+
 export default App
