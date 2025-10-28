@@ -13,7 +13,6 @@ import Modal from '@mui/material/Modal';
 import SaveAltTwoToneIcon from '@mui/icons-material/SaveAltTwoTone';
 import { useEffect } from 'react';
 
-
 const style = 
   {
     position: 'absolute',
@@ -27,7 +26,6 @@ const style =
     p: 4,
 };
 
-
 function App() 
 {
   {/* Arrays to keep track of all fruits and their data, the indexes correlate to a specific fruit*/}
@@ -37,15 +35,6 @@ function App()
   const [trigger, setTrigger] = useState(false);
   const [quantityCount, setQuantityCount] = useState([0,0,0,0,0,0]);
   const [trackLimit, setTrackLimit] = useState(true);
-
-
-  // useEffect(() => 
-  // {
-  //   if (!trackLimit)
-  //   {
-  //     setTrackLimit(true);
-  //   }
-  // }, [trackLimit]);
 
   const [openModal, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -99,33 +88,6 @@ function App()
     method: "GET",
     redirect: "follow"
   };
-  
-
-  // function fetchFruit()
-  // {
-  //   let temp = 0;
-  //   for (let i = 0; i < checked.length; i++)
-  //   {
-  //     if (checked[i] == false)
-  //     {
-  //       fetch("/api/" + name[i], requestOptions)
-  //       .then(response => response.json())
-  //       .then(data => 
-  //       {
-  //         temp += (data.nutritions.sugar * quantityCount[i]);
-  //         // setCount(prevCount => prevCount + (data.nutritions.sugar * quantityCount[i]));
-  //       })
-  //       .catch(error => console.log('error', error))
-  //       .finally(() => 
-  //         {
-  //           setCount(temp);
-  //           console.log(temp);
-  //         });
-  //       {/*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally */}
-  //       {/*This is so that I can use the latest updated value instead of a stale value */}
-  //     }
-  //   }
-  // }
 
   function fetchFruit() 
   {
